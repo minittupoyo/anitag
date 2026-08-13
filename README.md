@@ -1,6 +1,6 @@
 # anitag
 
-<video src="image/rename.mp4" controls width="720"></video>
+https://github.com/user-attachments/assets/d6312225-dfc3-4b03-98af-a28b311aafeb
 
 Tauri v2 と React / TypeScript で構築されたアニメ動画ファイルのリネームおよびメタデータ管理ツールです。
 
