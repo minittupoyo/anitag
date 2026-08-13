@@ -1,53 +1,68 @@
 #!/usr/bin/env python3
 """
 anitag デモ用アニメ動画ファイル生成スクリプト
-カテゴリ（形式）を指定してデモファイルを生成できます。
+指定カテゴリに対して12話分のリアルなダミーファイルを生成します。
+・グループ名は実行ごとに1つランダム決定して固定
+・話数のうち一定確率で v2 / v3 サフィックスをランダム混入
 """
 import argparse
-import sys
+import random
 from pathlib import Path
 
-# カテゴリ別のダミーファイル名定義
-PATTERNS_BY_CATEGORY = {
-    "fansub": [
-        "[HorribleSubs] Sousou no Frieren - 01 [1080p].mkv",
-        "[Erai-raws] Sousou no Frieren - 02 [1080p][Multiple Subtitle].mkv",
-        "[SubsPlease] Sousou no Frieren - 03 (1080p) [A1B2C3D4].mkv",
-        "[SubGroup] Sousou no Frieren - 04v2 [1080p].mp4",
-        "[SubGroup] Sousou no Frieren - 05 [1080p].mkv",
-    ],
-    "se": [
-        "Dungeon_Meshi_S01E01_1080p_WEB-DL.mkv",
-        "Dungeon_Meshi_S01E02_1080p.mkv",
-        "Dungeon_Meshi_S01E03v2_1080p.mkv",
-        "Dungeon_Meshi_S01E04_1080p.mp4",
-    ],
-    "jp": [
-        "葬送のフリーレン 第01話 「冒険の終わり」.ts",
-        "葬送のフリーレン 第02話.ts",
-        "葬送のフリーレン 第03v2話 「蒼月草」.mp4",
-        "ダンジョン飯 第14話.mkv",
-    ],
-    "symbol": [
-        "Anime Name #01 (BD 1080p).mkv",
-        "Anime Name #02 (BD 1080p).mkv",
-        "Anime_Name_EP03_x265.mkv",
-        "Title [04v2] [1080p].mp4",
-    ],
-    "absolute": [
-        "One Piece - 1085 [1080p].mp4",
-        "One Piece - 1086 [1080p].mp4",
-    ],
-}
+RELEASE_GROUPS = [
+    "[HorribleSubs]",
+    "[Erai-raws]",
+    "[SubsPlease]",
+    "[Judas]",
+    "[Kurogiri]",
+]
 
-CATEGORY_DESCRIPTIONS = {
-    "all": "すべての形式を一括生成",
-    "fansub": "海外字幕組・リリースグループ形式 ([Group] Title - 01)",
-    "se": "Season & Episode 形式 (Title_S01E01)",
-    "jp": "日本語話数表記 (タイトル 第01話)",
-    "symbol": "記号・話数前置形式 (Title #01, EP01)",
-    "absolute": "通算話数形式 (Title - 1085)",
-}
+TV_STATIONS = [
+    "[TOKYO MX]",
+    "[BS11]",
+    "[AT-X]",
+    "[MBS]",
+]
+
+SAMPLE_SUBTITLES = [
+    "冒険の終わり", "嘘つき", "蒼月草", "魂の眠る地", "死者の魔法",
+    "村の英雄", "おとぎ話のようなもの", "初陣", "断頭台のアウラ", "神技のレヴォルテ",
+    "北側の諸国", "本物の英雄"
+]
+
+def generate_filenames(category: str) -> list[str]:
+    # 実行ごとに固定するランダムグループ名・放送局名
+    group_name = random.choice(RELEASE_GROUPS)
+    station_name = random.choice(TV_STATIONS)
+    
+    filenames = []
+    total_episodes = 12
+
+    for ep in range(1, total_episodes + 1):
+        # 約25%の確率で v2 / v3 表記を混ぜる
+        v_suffix = ""
+        r = random.random()
+        if r < 0.20:
+            v_suffix = "v2"
+        elif r < 0.25:
+            v_suffix = "v3"
+
+        ep_str_2d = f"{ep:02d}{v_suffix}"
+        ep_str_num = f"{ep}{v_suffix}"
+        sub_title = SAMPLE_SUBTITLES[(ep - 1) % len(SAMPLE_SUBTITLES)]
+
+        if category == "fansub":
+            filenames.append(f"{group_name} Sousou no Frieren - {ep_str_2d} [1080p HEVC].mkv")
+        elif category == "se":
+            filenames.append(f"Sousou_no_Frieren_S01E{ep_str_2d}_1080p.mkv")
+        elif category == "jp":
+            filenames.append(f"葬送のフリーレン 第{ep_str_2d}話 「{sub_title}」 {station_name}.ts")
+        elif category == "symbol":
+            filenames.append(f"Sousou no Frieren #{ep_str_2d} (BD 1080p).mkv")
+        elif category == "absolute":
+            filenames.append(f"Sousou no Frieren - {ep + 1000}{v_suffix} [1080p].mp4")
+
+    return filenames
 
 def main():
     parser = argparse.ArgumentParser(description="anitag デモ用動画ファイル生成ツール")
@@ -55,7 +70,7 @@ def main():
         "-t", "--type",
         choices=["all", "fansub", "se", "jp", "symbol", "absolute"],
         default="all",
-        help="生成するファイル名の形式カテゴリを選択"
+        help="生成するファイル名の形式カテゴリを選択 (デフォルト: all)"
     )
     parser.add_argument(
         "-o", "--output",
@@ -65,19 +80,18 @@ def main():
 
     args = parser.parse_args()
 
-    selected_category = args.type
     target_dir = Path(args.output)
     target_dir.mkdir(parents=True, exist_ok=True)
 
     files_to_generate = []
-    if selected_category == "all":
-        for cat, files in PATTERNS_BY_CATEGORY.items():
-            files_to_generate.extend(files)
+    if args.type == "all":
+        for cat in ["fansub", "se", "jp", "symbol"]:
+            files_to_generate.extend(generate_filenames(cat))
     else:
-        files_to_generate = PATTERNS_BY_CATEGORY.get(selected_category, [])
+        files_to_generate = generate_filenames(args.type)
 
     print(f"デモ用ダミーファイルを生成中:")
-    print(f"  ・出力形式: {selected_category} ({CATEGORY_DESCRIPTIONS[selected_category]})")
+    print(f"  ・出力形式: {args.type}")
     print(f"  ・出力先:   {target_dir.resolve()}\n")
 
     count = 0
@@ -87,7 +101,7 @@ def main():
         count += 1
         print(f"  └─ 作成: {filename}")
 
-    print(f"\n生成完了: 計 {count} 件のダミーファイルを作成しました")
+    print(f"\n生成完了: 計 {count} 件（12話分）のダミーファイルを作成しました")
     print(f"anitag で {target_dir.resolve()} を選択してテストできます")
 
 if __name__ == "__main__":
