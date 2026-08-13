@@ -2,8 +2,8 @@ name: "Release Windows Build"
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
