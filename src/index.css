@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+/* Fontsource Variable フォント定義 */
+@layer base {
+  body {
+    @apply bg-zinc-950 text-zinc-100 antialiased min-h-screen select-none m-0;
+    font-family: 'Plus Jakarta Sans Variable', 'Noto Sans JP Variable', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+}
+
+/* カスタムスクロールバー */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-zinc-950;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-zinc-800 rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-zinc-700;
+}
