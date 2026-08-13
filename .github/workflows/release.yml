@@ -46,5 +46,6 @@ jobs:
           tagName: v__VERSION__
           releaseName: "anitag v__VERSION__"
           releaseBody: "anitag Windows Release Build"
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
+          includeUpdaterJson: false
