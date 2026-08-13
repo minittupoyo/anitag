@@ -2,19 +2,21 @@
 """
 anitag デモ用アニメ動画ファイル生成スクリプト
 指定カテゴリに対して12話分のリアルなダミーファイルを生成します。
-・グループ名は実行ごとに1つランダム決定して固定
+・架空のグループ名を実行ごとに1つランダム決定して固定
 ・話数のうち一定確率で v2 / v3 サフィックスをランダム混入
 """
 import argparse
 import random
 from pathlib import Path
 
+# 完全に架空のリリースグループ名（実在する名称は使用しない）
 RELEASE_GROUPS = [
-    "[HorribleSubs]",
-    "[Erai-raws]",
-    "[SubsPlease]",
-    "[Judas]",
-    "[Kurogiri]",
+    "[AniSubGroup]",
+    "[PixelFansub]",
+    "[SkyEncode]",
+    "[NekoSubs]",
+    "[StarlightRip]",
+    "[ZeroSub]",
 ]
 
 TV_STATIONS = [
@@ -31,7 +33,7 @@ SAMPLE_SUBTITLES = [
 ]
 
 def generate_filenames(category: str) -> list[str]:
-    # 実行ごとに固定するランダムグループ名・放送局名
+    # 実行ごとに固定するランダムな架空グループ名・放送局名
     group_name = random.choice(RELEASE_GROUPS)
     station_name = random.choice(TV_STATIONS)
     
@@ -48,7 +50,6 @@ def generate_filenames(category: str) -> list[str]:
             v_suffix = "v3"
 
         ep_str_2d = f"{ep:02d}{v_suffix}"
-        ep_str_num = f"{ep}{v_suffix}"
         sub_title = SAMPLE_SUBTITLES[(ep - 1) % len(SAMPLE_SUBTITLES)]
 
         if category == "fansub":
